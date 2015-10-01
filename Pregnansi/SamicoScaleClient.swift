@@ -10,12 +10,14 @@ import Foundation
 import CoreBluetooth
 
 class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
-
+    
     private var centralManager: CBCentralManager?
     private var identifiers: [NSUUID] = []
     private var peripheral: CBPeripheral?
     
     private var scanFoundCallback: ((CBPeripheral) -> Void)?
+    
+    private var lastStableWeightInGrams: Int = 0
     
     override init() {
         super.init()
@@ -34,7 +36,7 @@ class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     func connect() {
         if (peripheral != nil && centralManager?.state == CBCentralManagerState.PoweredOn) {
             peripheral!.delegate = self
-            print("Connecting to \(peripheral?.name)")
+            print("Connecting to \(peripheral?.name)...")
             centralManager?.connectPeripheral(peripheral!, options: [
                 CBConnectPeripheralOptionNotifyOnConnectionKey: true,
                 CBConnectPeripheralOptionNotifyOnDisconnectionKey: true,
@@ -63,39 +65,57 @@ class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     
     func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
         print("Connected to \(peripheral.name)")
+        lastStableWeightInGrams = 0
+        peripheral.discoverServices(nil)
+    }
+    
+    func peripheral(peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
+        for service in peripheral.services! {
+            print("Found service \(service.UUID.UUIDString)")
+            peripheral.discoverCharacteristics(nil, forService: service)
+        }
+    }
+    
+    func peripheral(peripheral: CBPeripheral, didDiscoverCharacteristicsForService service: CBService, error: NSError?) {
+        for charateristic in service.characteristics! {
+            print("Found characteristic \(charateristic.UUID.UUIDString)")
+            charateristic.properties
+            if (charateristic.properties.contains(.Notify)) {
+                print("Enabling notification for \(charateristic.UUID.UUIDString)")
+                peripheral.setNotifyValue(true, forCharacteristic: charateristic)
+            }
+        }
+    }
+    
+    func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
+        let data: NSData = characteristic.value!
+        let value: [UInt8] = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
+//        print("Got notified \(value)")
+
+        // If weighing scale is stable and value is grams
+        if ((value[0] & 0xFF) == 203 && (value[1] & 0xFF) == 0) {
+            let weight: Int = (Int(value[2]) << 8 | Int(value[3])) * 100
+            lastStableWeightInGrams = weight
+//            print("New weight data: \(weight), \(value[0] & 0xFF), \(value[1] & 0xFF)")
+        }
     }
     
     func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
         print("Disconnected from \(peripheral.name)")
+        if (lastStableWeightInGrams > 0) {
+            // TODO(abhi): Add a card to notify user
+            print("Weight on Date is \(lastStableWeightInGrams)")
+        }
         connect()
     }
     
     func centralManagerDidUpdateState(central: CBCentralManager) {
-        switch (central.state) {
-        case CBCentralManagerState.PoweredOff:
-            print("PoweredOff")
-            
-        case CBCentralManagerState.Unauthorized:
-            // Indicate to user that the iOS device does not support BLE.
-            print("BLE not supported")
-            break
-            
-        case CBCentralManagerState.Unknown:
-            // Wait for another event
-            print("Unknown")
-            break
-            
-        case CBCentralManagerState.PoweredOn:
-            print("PoweredOn")
+        if (central.state == CBCentralManagerState.PoweredOn) {
             connect()
-            break
-            
-        case CBCentralManagerState.Resetting:
-            print("Resetting")
-            break
-            
-        case CBCentralManagerState.Unsupported:
-            break
+        } else if (central.state == CBCentralManagerState.PoweredOff) {
+            // TODO(abhi): Ask user to turn on bluetooth
+        } else {
+            print("Invalid bluetooth state \(central.state)")
         }
     }
 }
