@@ -24,11 +24,13 @@ class ScaleConnectViewController: UIViewController {
         super.viewDidAppear(animated)
         spinner.startAnimating()
         let app: AppDelegate = Utils.sharedInstance()
-        app.scaleClient.scanScales(){
+        app.scaleClient.scanScales() {
             peripheral -> Void in
             
             self.spinner.stopAnimating()
             Utils.setWeighingScale(peripheral.identifier)
+            
+            self.dismissViewControllerAnimated(true, completion: {})
         }
     }
 }

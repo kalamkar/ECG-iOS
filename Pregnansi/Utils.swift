@@ -47,6 +47,6 @@ class Utils {
 
     static func setWeighingScale(identifier: NSUUID) {
         let defaults = NSUserDefaults.standardUserDefaults()
-        defaults.setObject(identifier, forKey: "WEIGHING_SCALE")
+        defaults.setObject(identifier.UUIDString, forKey: "WEIGHING_SCALE")
     }
 }

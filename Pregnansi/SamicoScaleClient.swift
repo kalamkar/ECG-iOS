@@ -18,27 +18,33 @@ class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     private var scanFoundCallback: ((CBPeripheral) -> Void)?
     
     override init() {
+        super.init()
+
         let scaleId: NSUUID? = Utils.getWeighingScale()
         if (scaleId != nil) {
             identifiers.append(scaleId!)
         }
+        centralManager = CBCentralManager(delegate: self, queue: nil)
+        let knownPeripherals: [CBPeripheral]? = centralManager?.retrievePeripheralsWithIdentifiers(identifiers)
+        if (knownPeripherals != nil && knownPeripherals!.count > 0) {
+            peripheral = knownPeripherals![0]
+        }
     }
     
     func connect() {
-        if (centralManager == nil) {
-            centralManager = CBCentralManager(delegate: self, queue: nil)
-        }
-
-        if (peripheral != nil) {
+        if (peripheral != nil && centralManager?.state == CBCentralManagerState.PoweredOn) {
             peripheral!.delegate = self
+            print("Connecting to \(peripheral?.name)")
+            centralManager?.connectPeripheral(peripheral!, options: [
+                CBConnectPeripheralOptionNotifyOnConnectionKey: true,
+                CBConnectPeripheralOptionNotifyOnDisconnectionKey: true,
+                CBConnectPeripheralOptionNotifyOnNotificationKey: true
+            ])
         }
     }
     
     func scanScales(callback: (CBPeripheral) -> Void) {
         print("Starting BLE Scan")
-        if (centralManager == nil) {
-            centralManager = CBCentralManager(delegate: self, queue: nil)
-        }
         centralManager!.scanForPeripheralsWithServices(nil, options: nil)
         scanFoundCallback = callback
     }
@@ -49,6 +55,9 @@ class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             centralManager!.stopScan()
             Utils.setWeighingScale(peripheral.identifier)
             print("Found \(peripheral.name)")
+            if (scanFoundCallback != nil) {
+                scanFoundCallback!(peripheral)
+            }
         }
     }
     
@@ -58,6 +67,7 @@ class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     
     func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
         print("Disconnected from \(peripheral.name)")
+        connect()
     }
     
     func centralManagerDidUpdateState(central: CBCentralManager) {
@@ -77,20 +87,7 @@ class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             
         case CBCentralManagerState.PoweredOn:
             print("PoweredOn")
-            if (peripheral == nil) {
-                let knownPeripherals: [CBPeripheral]? = centralManager?.retrievePeripheralsWithIdentifiers(identifiers)
-                if (knownPeripherals != nil && knownPeripherals!.count > 0) {
-                    peripheral = knownPeripherals![0]
-                }
-            }
-
-            if (peripheral != nil) {
-                centralManager?.connectPeripheral(peripheral!, options: [
-                    CBConnectPeripheralOptionNotifyOnConnectionKey: true,
-                    CBConnectPeripheralOptionNotifyOnDisconnectionKey: true,
-                    CBConnectPeripheralOptionNotifyOnNotificationKey: true
-                ])
-            }
+            connect()
             break
             
         case CBCentralManagerState.Resetting:
