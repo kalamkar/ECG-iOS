@@ -26,7 +26,9 @@ class AboutViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         if let version = NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? String {
-            self.version.text = version
+            if let build = NSBundle.mainBundle().infoDictionary?["CFBundleVersion"] as? String {
+                self.version.text = "\(version).\(build)"
+            }
         }
     }
 }
