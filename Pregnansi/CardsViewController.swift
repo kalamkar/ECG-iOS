@@ -33,12 +33,14 @@ class CardsViewController: UICollectionViewController {
     func onUserUpdated() {
         let app = Utils.sharedInstance();
         if (app.user != nil) {
-            print("We have user \(app.user!.name!)")
+            print("We have user \(app.user!.name!) with \(app.user!.cards.count) cards.")
 //            for card: Card in app.user!.cards {
 //                print("title = \(card.getTitle()) text=\(card.getText())")
 //            }
         }
-        self.collectionView?.reloadData()
+        dispatch_async(dispatch_get_main_queue()) {
+            self.collectionView?.reloadData()
+        }
     }
 
     override func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
