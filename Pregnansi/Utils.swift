@@ -49,4 +49,8 @@ class Utils {
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(identifier.UUIDString, forKey: "WEIGHING_SCALE")
     }
+    
+    static func getUIState() -> UIApplicationState {
+        return UIApplication.sharedApplication().applicationState
+    }
 }

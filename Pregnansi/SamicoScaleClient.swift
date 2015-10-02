@@ -11,10 +11,14 @@ import CoreBluetooth
 
 class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
-    private var centralManager: CBCentralManager?
-    private var identifiers: [NSUUID] = []
-    private var peripheral: CBPeripheral?
+    private let WEIGHT_SERVICE: CBUUID = CBUUID.init(string: "FFF0")
+    private let WEIGHT_CHARACTERISTIC: CBUUID = CBUUID.init(string: "FFF4")
     
+    private var centralManager: CBCentralManager?
+    private var knownPeripheral: CBPeripheral?
+
+    private var identifiers: [NSUUID] = []
+
     private var scanFoundCallback: ((CBPeripheral) -> Void)?
     
     private var lastStableWeightInGrams: Int = 0
@@ -26,23 +30,15 @@ class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         if (scaleId != nil) {
             identifiers.append(scaleId!)
         }
-        centralManager = CBCentralManager(delegate: self, queue: nil)
-        let knownPeripherals: [CBPeripheral]? = centralManager?.retrievePeripheralsWithIdentifiers(identifiers)
-        if (knownPeripherals != nil && knownPeripherals!.count > 0) {
-            peripheral = knownPeripherals![0]
-        }
+        centralManager = CBCentralManager(delegate: self, queue: nil, options: nil)
+//            [ CBCentralManagerOptionRestoreIdentifierKey : "care.dovetail.pregnansi" ])
     }
     
-    func connect() {
-        if (peripheral != nil && centralManager?.state == CBCentralManagerState.PoweredOn) {
-            peripheral!.delegate = self
-            print("Connecting to \(peripheral?.name)...")
-            centralManager?.connectPeripheral(peripheral!, options: [
-                CBConnectPeripheralOptionNotifyOnConnectionKey: true,
-                CBConnectPeripheralOptionNotifyOnDisconnectionKey: true,
-                CBConnectPeripheralOptionNotifyOnNotificationKey: true
-            ])
-        }
+    func connect(peripheral: CBPeripheral) {
+        print("Connecting to \(peripheral.name)...")
+        peripheral.delegate = self
+        centralManager?.connectPeripheral(peripheral, options: nil)
+//            [ CBCentralManagerOptionRestoreIdentifierKey : "care.dovetail.pregnansi" ])
     }
     
     func scanScales(callback: (CBPeripheral) -> Void) {
@@ -64,24 +60,23 @@ class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     }
     
     func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
-        print("Connected to \(peripheral.name)")
+        print("Connected to \(peripheral.name) while in \(Utils.getUIState().rawValue)")
         lastStableWeightInGrams = 0
-        peripheral.discoverServices(nil)
+        peripheral.delegate = self
+        peripheral.discoverServices([WEIGHT_SERVICE])
     }
     
     func peripheral(peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
+        print("didDiscoverServices \(error)")
         for service in peripheral.services! {
-            print("Found service \(service.UUID.UUIDString)")
-            peripheral.discoverCharacteristics(nil, forService: service)
+            peripheral.discoverCharacteristics([WEIGHT_CHARACTERISTIC], forService: service)
         }
     }
     
     func peripheral(peripheral: CBPeripheral, didDiscoverCharacteristicsForService service: CBService, error: NSError?) {
+        print("didDiscoverCharacteristicsForService \(error)")
         for charateristic in service.characteristics! {
-            print("Found characteristic \(charateristic.UUID.UUIDString)")
-            charateristic.properties
             if (charateristic.properties.contains(.Notify)) {
-                print("Enabling notification for \(charateristic.UUID.UUIDString)")
                 peripheral.setNotifyValue(true, forCharacteristic: charateristic)
             }
         }
@@ -90,32 +85,39 @@ class SamicoScaleClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
         let data: NSData = characteristic.value!
         let value: [UInt8] = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
-//        print("Got notified \(value)")
 
         // If weighing scale is stable and value is grams
         if ((value[0] & 0xFF) == 203 && (value[1] & 0xFF) == 0) {
             let weight: Int = (Int(value[2]) << 8 | Int(value[3])) * 100
             lastStableWeightInGrams = weight
-//            print("New weight data: \(weight), \(value[0] & 0xFF), \(value[1] & 0xFF)")
         }
     }
     
     func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
-        print("Disconnected from \(peripheral.name)")
+        print("Disconnected from \(peripheral.name) while in \(Utils.getUIState().rawValue)")
         if (lastStableWeightInGrams > 0) {
             // TODO(abhi): Add a card to notify user
             print("Weight on Date is \(lastStableWeightInGrams)")
         }
-        connect()
+        connect(peripheral)
     }
     
     func centralManagerDidUpdateState(central: CBCentralManager) {
+        print("centralManagerDidUpdateState")
         if (central.state == CBCentralManagerState.PoweredOn) {
-            connect()
+            let knownPeripherals: [CBPeripheral]? = centralManager?.retrievePeripheralsWithIdentifiers(identifiers)
+            if (knownPeripherals != nil && knownPeripherals!.count > 0) {
+                connect(knownPeripherals![0])
+                knownPeripheral = knownPeripherals![0]
+            }
         } else if (central.state == CBCentralManagerState.PoweredOff) {
             // TODO(abhi): Ask user to turn on bluetooth
         } else {
             print("Invalid bluetooth state \(central.state)")
         }
+    }
+    
+    func centralManager(central: CBCentralManager, willRestoreState dict: [String : AnyObject]) {
+        print("centralManager willRestoreState")
     }
 }
