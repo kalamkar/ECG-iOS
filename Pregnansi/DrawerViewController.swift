@@ -27,10 +27,10 @@ class DrawerViewController: UITableViewController {
     }
     
     @IBAction func onInsights(sender: AnyObject) {
-        self.performSegueWithIdentifier("showInsights", sender: nil)
-//        let storyboard = UIStoryboard(name: "Independent", bundle: nil)
-//        let vc = storyboard.instantiateViewControllerWithIdentifier("ScaleConnect")
-//        self.presentViewController(vc, animated: true, completion: nil)
+//        self.performSegueWithIdentifier("showInsights", sender: nil)
+        let storyboard = UIStoryboard(name: "Independent", bundle: nil)
+        let vc = storyboard.instantiateViewControllerWithIdentifier("ScaleConnect")
+        self.presentViewController(vc, animated: true, completion: nil)
     }
     
     @IBAction func onBrowse(sender: AnyObject) {
