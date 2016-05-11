@@ -13,6 +13,7 @@ protocol BluetoothUpdatesDelegate: class {
     func didUpdateState(state: CBCentralManagerState)
     func didFindPeripheral(peripheral: CBPeripheral)
     func didConnectPeripheral(peripheral: CBPeripheral)
+    func didUpdateData(data: [UInt8])
     func didDisconnectPeripheral(peripheral: CBPeripheral)
 }
 
@@ -37,7 +38,6 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
     }
     
     func startScan() {
-        print("Starting BLE Scan")
         centralManager.scanForPeripheralsWithServices(nil, options: nil)
     }
     
@@ -50,8 +50,6 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
     }
     
     func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
-
-        print("Found \(peripheral.name)")
         if (peripheral.name != nil && peripheral.name!.hasPrefix(Config.BT_DEVICE_NAME_PREFIX)) {
             centralManager!.stopScan()
             delegate?.didFindPeripheral(peripheral)
@@ -59,21 +57,19 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
     }
     
     func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
-        print("Connected to \(peripheral.name) while in \(Utils.getUIState().rawValue)")
+        print("Connected to \(peripheral.name)")
         delegate?.didConnectPeripheral(peripheral)
         peripheral.delegate = self
         peripheral.discoverServices([CBUUID(string: Config.DOVETAIL_SERVICE)])
     }
     
     func peripheral(peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
-        print("didDiscoverServices \(peripheral.services!)")
         for service in peripheral.services! {
             peripheral.discoverCharacteristics([CBUUID(string: Config.ECG_CHARACTERISTIC)], forService: service)
         }
     }
     
     func peripheral(peripheral: CBPeripheral, didDiscoverCharacteristicsForService service: CBService, error: NSError?) {
-        print("didDiscoverCharacteristicsForService \(error)")
         for charateristic in service.characteristics! {
             if (charateristic.properties.contains(.Notify)) {
                 peripheral.setNotifyValue(true, forCharacteristic: charateristic)
@@ -84,11 +80,11 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
     func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
         let data: NSData = characteristic.value!
         let value: [UInt8] = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
-        print("Got data \(value)")
+        delegate?.didUpdateData(value)
     }
     
     func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
-        print("Disconnected from \(peripheral.name) while in \(Utils.getUIState().rawValue)")
+        print("Disconnected from \(peripheral.name)")
         delegate?.didDisconnectPeripheral(peripheral)
     }
     

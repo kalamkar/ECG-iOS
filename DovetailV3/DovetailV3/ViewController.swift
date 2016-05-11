@@ -12,6 +12,7 @@ import CoreBluetooth
 class ViewController: UIViewController, BluetoothUpdatesDelegate {
 
     @IBOutlet var spinner: UIActivityIndicatorView!
+    @IBOutlet var chart: ChartView!
     
     var app: AppDelegate!
     
@@ -42,7 +43,7 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
     }
     
     func didFindPeripheral(peripheral: CBPeripheral) {
-        self.spinner.stopAnimating()
+        spinner.hidden = true
         app.bleClient.connect(peripheral)
     }
     
@@ -50,9 +51,13 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
         
     }
     
+    func didUpdateData(data: [UInt8]) {
+        chart.update(data)
+    }
+    
     func didDisconnectPeripheral(peripheral: CBPeripheral) {
         app.bleClient.startScan()
-        spinner.startAnimating()
+        spinner.hidden = false
     }
 }
 

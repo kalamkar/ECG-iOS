@@ -18,26 +18,26 @@ class Config {
     static let DOVETAIL_SERVICE:String = "404846A0-608A-11E5-AB45-0002A5D5C51B"
     static let ECG_CHARACTERISTIC:String = "404846A1-608A-11E5-AB45-0002A5D5C51B"
     
-//    static long DATA_UUID = 0x404846A1
-//    static int SAMPLE_INTERVAL_MS = 5
-//    static int SAMPLES_PER_BROADCAST = 20 // Hardcoded in FW
+    static let SAMPLE_INTERVAL_MS: Int = 5
+    static let SAMPLES_PER_BROADCAST: Int = 20 // Hardcoded in FW
     
 //    static int AUDIO_PLAYBACK_RATE = 4000 // 4kHz
 //    static int AUDIO_BYTES_PER_SAMPLE = AUDIO_PLAYBACK_RATE / (1000 / SAMPLE_INTERVAL_MS)
-//    
-//    static int GRAPH_LENGTH = 1000			// 5 seconds at 200Hz
-//    static int BREATH_GRAPH_LENGTH = 6000		// 30 seconds at 200Hz
-//    
-//    static int SHORT_GRAPH_MIN = 0 	//  64 for V2,  64 for V1
-//    static int SHORT_GRAPH_MAX = 275 	// 192 for V2, 255 for V1
-//    
+    
+    static let GRAPH_LENGTH: Int = 1000			// 5 seconds at 200Hz
+    static let BREATH_GRAPH_LENGTH: Int = 6000		// 30 seconds at 200Hz
+    
+    static let SHORT_GRAPH_MIN: Int = 0 	//  64 for V2,  64 for V1
+    static let SHORT_GRAPH_MAX: Int = 275 	// 192 for V2, 255 for V1
+    
 //    static int LONG_GRAPH_MIN = 0		// 100 for V2, 100 for V1
 //    static int LONG_GRAPH_MAX = 255	// 192 for V2, 255 for V1
-//    
-//    static int GRAPH_UPDATE_MILLIS = 500
+    
+    static let GRAPH_UPDATE_MILLIS: Int = 500
+    static let GRAPH_UPDATE_INTERVAL: Int = GRAPH_UPDATE_MILLIS / (SAMPLE_INTERVAL_MS * SAMPLES_PER_BROADCAST)
     
     // Detect features every 5 chunk updates (and not every update), 500ms interval
-//    static int FEATURE_DETECT_INTERVAL = GRAPH_UPDATE_MILLIS / (SAMPLE_INTERVAL_MS * SAMPLES_PER_BROADCAST)
+    static let FEATURE_DETECT_INTERVAL: Int = GRAPH_UPDATE_MILLIS / (SAMPLE_INTERVAL_MS * SAMPLES_PER_BROADCAST)
     
 //    static int BPM_UPDATE_MILLIS = 3000
 //    static int MIN_BPM_SAMPLES = 5

@@ -10,6 +10,7 @@
 		382F5DFA1CE171B900B9274B /* BluetoothSmartClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 382F5DF91CE171B900B9274B /* BluetoothSmartClient.swift */; };
 		382F5DFC1CE1754200B9274B /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 382F5DFB1CE1754200B9274B /* Utils.swift */; };
 		382F5DFE1CE177E700B9274B /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 382F5DFD1CE177E700B9274B /* Config.swift */; };
+		38ACF9AC1CE39CDE00B49DF8 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38ACF9AB1CE39CDE00B49DF8 /* ChartView.swift */; };
 		38F4725B1CE16F4E00AC583F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F4725A1CE16F4E00AC583F /* AppDelegate.swift */; };
 		38F4725D1CE16F4E00AC583F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F4725C1CE16F4E00AC583F /* ViewController.swift */; };
 		38F472601CE16F4E00AC583F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 38F4725E1CE16F4E00AC583F /* Main.storyboard */; };
@@ -21,6 +22,7 @@
 		382F5DF91CE171B900B9274B /* BluetoothSmartClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BluetoothSmartClient.swift; sourceTree = "<group>"; };
 		382F5DFB1CE1754200B9274B /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		382F5DFD1CE177E700B9274B /* Config.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		38ACF9AB1CE39CDE00B49DF8 /* ChartView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		38F472571CE16F4D00AC583F /* DovetailV3.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DovetailV3.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		38F4725A1CE16F4E00AC583F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		38F4725C1CE16F4E00AC583F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -69,6 +71,7 @@
 				38F472611CE16F4E00AC583F /* Assets.xcassets */,
 				38F472631CE16F4E00AC583F /* LaunchScreen.storyboard */,
 				38F472661CE16F4E00AC583F /* Info.plist */,
+				38ACF9AB1CE39CDE00B49DF8 /* ChartView.swift */,
 			);
 			path = DovetailV3;
 			sourceTree = "<group>";
@@ -155,6 +158,7 @@
 				382F5DFE1CE177E700B9274B /* Config.swift in Sources */,
 				382F5DFA1CE171B900B9274B /* BluetoothSmartClient.swift in Sources */,
 				382F5DFC1CE1754200B9274B /* Utils.swift in Sources */,
+				38ACF9AC1CE39CDE00B49DF8 /* ChartView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
