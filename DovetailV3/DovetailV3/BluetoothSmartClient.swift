@@ -17,12 +17,13 @@ protocol BluetoothUpdatesDelegate: class {
 }
 
 class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
-    private let DOVETAIL_SERVICE: CBUUID = CBUUID.init(string: "46A0")
-    private let DOVETAIL_CHARACTERISTIC: CBUUID = CBUUID.init(string: "46A1")
+    private let DOVETAIL_SERVICE: CBUUID = CBUUID.init(string: "4048") // 4048 46A0
+    private let DOVETAIL_CHARACTERISTIC: CBUUID = CBUUID.init(string: "4048")  // 4048 46A0
     
     private var centralManager: CBCentralManager!
+    private var peripheral: CBPeripheral?
     
-    private var delegate: BluetoothUpdatesDelegate?
+    var delegate: BluetoothUpdatesDelegate?
     
     override init() {
         super.init()
@@ -31,8 +32,8 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
         //            [ CBCentralManagerOptionRestoreIdentifierKey : "care.dovetail.pregnansi" ])
     }
     
-    func setDelegate(delegate: BluetoothUpdatesDelegate) {
-        self.delegate = delegate
+    func isBluetoothOn() -> Bool {
+        return centralManager.state == CBCentralManagerState.PoweredOn;
     }
     
     func startScan() {
@@ -41,8 +42,9 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
     }
     
     func connect(peripheral: CBPeripheral) {
-        print("Connecting to \(peripheral.name)...")
-        peripheral.delegate = self
+        self.peripheral = peripheral
+        print("Connecting to \(self.peripheral!.name)...")
+        self.peripheral!.delegate = self
         centralManager.connectPeripheral(peripheral, options: nil)
         //            [ CBCentralManagerOptionRestoreIdentifierKey : "care.dovetail.pregnansi" ])
     }
@@ -50,7 +52,7 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
     func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
 
         print("Found \(peripheral.name)")
-        if (peripheral.name != nil && peripheral.name!.hasPrefix("nRF5x"/*Config.BT_DEVICE_NAME_PREFIX*/)) {
+        if (peripheral.name != nil && peripheral.name!.hasPrefix(Config.BT_DEVICE_NAME_PREFIX)) {
             centralManager!.stopScan()
             delegate?.didFindPeripheral(peripheral)
         }
@@ -60,13 +62,13 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
         print("Connected to \(peripheral.name) while in \(Utils.getUIState().rawValue)")
         delegate?.didConnectPeripheral(peripheral)
         peripheral.delegate = self
-        peripheral.discoverServices([DOVETAIL_SERVICE])
+        peripheral.discoverServices([CBUUID(string: Config.DOVETAIL_SERVICE)])
     }
     
     func peripheral(peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
-        print("didDiscoverServices \(error)")
+        print("didDiscoverServices \(peripheral.services!)")
         for service in peripheral.services! {
-            peripheral.discoverCharacteristics([DOVETAIL_CHARACTERISTIC], forService: service)
+            peripheral.discoverCharacteristics([CBUUID(string: Config.ECG_CHARACTERISTIC)], forService: service)
         }
     }
     
@@ -91,14 +93,8 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
     }
     
     func centralManagerDidUpdateState(central: CBCentralManager) {
-        if (central.state == CBCentralManagerState.PoweredOn) {
-            print("Bluetooth is ON")
-            centralManager!.scanForPeripheralsWithServices(nil, options: nil)
-        } else if (central.state == CBCentralManagerState.PoweredOff) {
-            // TODO(abhi): Ask user to turn on bluetooth
-            print("Bluetooth is OFF")
-        } else {
-            print("Invalid bluetooth state \(central.state)")
+        if (delegate != nil) {
+            delegate?.didUpdateState(central.state)
         }
     }
     

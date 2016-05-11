@@ -18,17 +18,21 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         app = Utils.sharedInstance()
-        app.bleClient.setDelegate(self)
+        app.bleClient.delegate = self
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        spinner.startAnimating()
+        if (app.bleClient.isBluetoothOn()) {
+            app.bleClient.startScan()
+            spinner.startAnimating()
+        }
     }
     
     func didUpdateState(state: CBCentralManagerState) {
         if (state == CBCentralManagerState.PoweredOn) {
             app.bleClient.startScan()
+            spinner.startAnimating()
         } else if (state == CBCentralManagerState.PoweredOff) {
             // TODO(abhi): Ask user to turn on bluetooth
             print("Bluetooth is OFF")
@@ -47,7 +51,8 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
     }
     
     func didDisconnectPeripheral(peripheral: CBPeripheral) {
-        
+        app.bleClient.startScan()
+        spinner.startAnimating()
     }
 }
 
