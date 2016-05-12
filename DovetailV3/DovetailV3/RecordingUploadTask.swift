@@ -19,12 +19,9 @@ class RecordingUploadTask {
     init(filename: String) {
         self.filename = filename
         self.data = NSData(contentsOfFile: filename)
-        let tokens: [String] = filename.characters.split("/").map(String.init)
-        var tags = tokens.last!.stringByReplacingOccurrencesOfString("_", withString: ",")
-        tags = tags.stringByReplacingOccurrencesOfString("Dovetail-", withString: "")
-        self.tags = tags.stringByReplacingOccurrencesOfString(".raw", withString: "")
+        self.tags = RecordingUploadTask.getTags(filename)
     }
-    
+
     func run() {
         if (data == nil) {
             print("File data is nil for \(filename), removing it.")
@@ -81,6 +78,16 @@ class RecordingUploadTask {
         queue.removeAtIndex(queue.indexOf(self.filename)!)
         Utils.setUploadQueue(queue)
         Utils.uploadRecordings()
+    }
+    
+    private static func getTags(filename: String) -> String {
+        let tokens: [String] = filename.characters.split("/").map(String.init)
+        var tags = tokens.last!.stringByReplacingOccurrencesOfString("_", withString: ",")
+        tags = tags.stringByReplacingOccurrencesOfString("Dovetail-", withString: "")
+        tags = tags.stringByReplacingOccurrencesOfString(".raw", withString: "")
+        tags += ",\(1000 / Config.SAMPLE_INTERVAL_MS)Hz"
+        tags += "," + Utils.getModelName().stringByReplacingOccurrencesOfString(",", withString: "_")
+        return tags
     }
 }
 
