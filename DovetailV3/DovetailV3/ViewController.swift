@@ -17,6 +17,7 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate, UITextFieldDel
     @IBOutlet var tags: UITextField!
     @IBOutlet var record: UIButton!
     @IBOutlet var recordStatus: UILabel!
+    @IBOutlet var recorder: UIStackView!
     
     private var app: AppDelegate!
     
@@ -29,6 +30,7 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate, UITextFieldDel
         app = Utils.sharedInstance()
         app.bleClient.delegate = self
         tags.delegate = self
+        self.recorder.hidden = true
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -98,6 +100,7 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate, UITextFieldDel
     func didConnectPeripheral(peripheral: CBPeripheral) {
         dispatch_async(dispatch_get_main_queue()) {
             self.status.text = "Connected"
+            self.recorder.hidden = false
         }
     }
     
@@ -111,12 +114,14 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate, UITextFieldDel
     func didDisconnectPeripheral(peripheral: CBPeripheral) {
         if (writer != nil) {
             writer!.close()
+            writer = nil
             self.record.titleLabel?.text = "Record"
         }
         app.bleClient.startScan()
         dispatch_async(dispatch_get_main_queue()) {
             self.spinner.hidden = false
             self.status.text = "Searching"
+            self.recorder.hidden = true
         }
     }
 }

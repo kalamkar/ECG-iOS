@@ -90,6 +90,7 @@
                         <outlet property="chart" destination="9e0-dY-7ps" id="YAb-sc-h8R"/>
                         <outlet property="record" destination="mE8-5R-XAL" id="of9-aQ-3Un"/>
                         <outlet property="recordStatus" destination="SSQ-Ge-5iN" id="2vC-4X-qAF"/>
+                        <outlet property="recorder" destination="6Ha-Bj-Jl7" id="I6i-Rb-Jvn"/>
                         <outlet property="spinner" destination="i0I-J4-QSH" id="TDi-ak-e8b"/>
                         <outlet property="status" destination="dNw-wS-B7g" id="9Vh-KS-c6F"/>
                         <outlet property="tags" destination="zpE-XW-Hcl" id="aQ1-4G-JJr"/>
