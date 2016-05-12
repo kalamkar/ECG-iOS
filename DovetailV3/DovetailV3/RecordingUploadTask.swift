@@ -27,7 +27,8 @@ class RecordingUploadTask {
     
     func run() {
         if (data == nil) {
-            print("File data is nil")
+            print("File data is nil for \(filename), removing it.")
+            removeFileFromQueue()
             return
         }
         
@@ -43,16 +44,13 @@ class RecordingUploadTask {
             data, response, error in
             
             if error != nil {
-                print("error=\(error)")
+                print("\(error?.localizedDescription)")
                 return
             }
             
             let responseCode = (response as! NSHTTPURLResponse).statusCode
             if (responseCode == 200) {
-                var queue = Utils.getUploadQueue()
-                queue.removeAtIndex(queue.indexOf(self.filename)!)
-                Utils.setUploadQueue(queue)
-                Utils.uploadRecordings()
+                self.removeFileFromQueue()
             }
         }
         task.resume()
@@ -76,6 +74,13 @@ class RecordingUploadTask {
         
         body.appendString("--\(BOUNDARY)--\r\n")
         return body
+    }
+    
+    private func removeFileFromQueue() {
+        var queue = Utils.getUploadQueue()
+        queue.removeAtIndex(queue.indexOf(self.filename)!)
+        Utils.setUploadQueue(queue)
+        Utils.uploadRecordings()
     }
 }
 

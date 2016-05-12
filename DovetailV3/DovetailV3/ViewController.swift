@@ -9,20 +9,26 @@
 import UIKit
 import CoreBluetooth
 
-class ViewController: UIViewController, BluetoothUpdatesDelegate {
+class ViewController: UIViewController, BluetoothUpdatesDelegate, UITextFieldDelegate {
 
+    @IBOutlet var status: UILabel!
     @IBOutlet var spinner: UIActivityIndicatorView!
     @IBOutlet var chart: ChartView!
     @IBOutlet var tags: UITextField!
     @IBOutlet var record: UIButton!
+    @IBOutlet var recordStatus: UILabel!
     
     private var app: AppDelegate!
+    
     private var writer: FileWriter? = nil
+    private var recordTimer: NSTimer? = nil
+    private var recordStartTime: NSDate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         app = Utils.sharedInstance()
         app.bleClient.delegate = self
+        tags.delegate = self
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -30,6 +36,7 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
         if (app.bleClient.isBluetoothOn()) {
             app.bleClient.startScan()
             spinner.startAnimating()
+            status.text = "Searching"
         }
     }
     
@@ -38,32 +45,60 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
             writer!.close()
             writer = nil
             self.record.setTitle("Record", forState: UIControlState.Normal)
+            recordTimer?.invalidate()
+            recordTimer = nil
+            self.recordStatus.text = ""
         } else {
             writer = FileWriter.init(tags: self.tags.text!)
             self.record.setTitle("Stop", forState: UIControlState.Normal)
+            recordTimer = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: #selector(ViewController.updateRecordTime), userInfo: nil, repeats: true)
+            recordStartTime = NSDate()
+        }
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    func updateRecordTime() {
+        let seconds:Int = abs(Int((recordStartTime?.timeIntervalSinceNow)!))
+        dispatch_async(dispatch_get_main_queue()) {
+            self.recordStatus.text = "\(seconds)"
         }
     }
     
     func didUpdateState(state: CBCentralManagerState) {
         if (state == CBCentralManagerState.PoweredOn) {
             app.bleClient.startScan()
-            spinner.startAnimating()
+            dispatch_async(dispatch_get_main_queue()) {
+                self.spinner.startAnimating()
+                self.status.text = "Searching"
+            }
         } else if (state == CBCentralManagerState.PoweredOff) {
             let alert = UIAlertController(title: "Bluetooth OFF", message: "Please turn on Bluetooth to connect to monitor.", preferredStyle: UIAlertControllerStyle.Alert)
             alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
             self.presentViewController(alert, animated: true, completion: nil)
+            dispatch_async(dispatch_get_main_queue()) {
+                self.status.text = "Bluetooth OFF"
+            }
         } else {
             print("Invalid bluetooth state \(state)")
         }
     }
     
     func didFindPeripheral(peripheral: CBPeripheral) {
-        spinner.hidden = true
         app.bleClient.connect(peripheral)
+        dispatch_async(dispatch_get_main_queue()) {
+            self.spinner.hidden = true
+            self.status.text = "Connecting"
+        }
     }
     
     func didConnectPeripheral(peripheral: CBPeripheral) {
-        
+        dispatch_async(dispatch_get_main_queue()) {
+            self.status.text = "Connected"
+        }
     }
     
     func didUpdateData(data: NSData) {
@@ -79,7 +114,10 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
             self.record.titleLabel?.text = "Record"
         }
         app.bleClient.startScan()
-        spinner.hidden = false
+        dispatch_async(dispatch_get_main_queue()) {
+            self.spinner.hidden = false
+            self.status.text = "Searching"
+        }
     }
 }
 
