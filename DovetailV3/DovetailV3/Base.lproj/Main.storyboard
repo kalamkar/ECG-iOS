@@ -17,9 +17,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="i0I-J4-QSH">
-                                <rect key="frame" x="560" y="28" width="20" height="20"/>
-                            </activityIndicatorView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9e0-dY-7ps" customClass="ChartView" customModule="DovetailV3" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="400" width="600" height="200"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -27,28 +24,60 @@
                                     <constraint firstAttribute="height" constant="200" id="D7y-KP-TRj"/>
                                 </constraints>
                             </view>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mE8-5R-XAL">
-                                <rect key="frame" x="0.0" y="362" width="49" height="30"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mE8-5R-XAL">
+                                <rect key="frame" x="20" y="362" width="49" height="30"/>
                                 <state key="normal" title="Record"/>
+                                <connections>
+                                    <action selector="didClickRecord:" destination="BYZ-38-t0r" eventType="primaryActionTriggered" id="Isp-c7-jig"/>
+                                </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SSQ-Ge-5iN">
+                                <rect key="frame" x="77" y="362" width="53" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="53" id="zcI-3M-6r5"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="zpE-XW-Hcl">
+                                <rect key="frame" x="138" y="362" width="180" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="180" id="o7J-CI-pzp"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="i0I-J4-QSH">
+                                <rect key="frame" x="560" y="28" width="20" height="20"/>
+                            </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstAttribute="trailing" secondItem="9e0-dY-7ps" secondAttribute="trailing" id="0zZ-1S-gEI"/>
                             <constraint firstItem="i0I-J4-QSH" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="4CK-Ck-3TF"/>
+                            <constraint firstItem="SSQ-Ge-5iN" firstAttribute="top" secondItem="mE8-5R-XAL" secondAttribute="top" id="8pF-2s-eyb"/>
                             <constraint firstItem="i0I-J4-QSH" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="AiF-7r-3ps"/>
-                            <constraint firstItem="9e0-dY-7ps" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" id="VEV-lv-bd3"/>
-                            <constraint firstItem="9e0-dY-7ps" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="eBp-7c-abd"/>
-                            <constraint firstAttribute="trailing" secondItem="9e0-dY-7ps" secondAttribute="trailing" id="ypp-UW-Mp3"/>
+                            <constraint firstItem="SSQ-Ge-5iN" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="77" id="ByE-11-6ch"/>
+                            <constraint firstItem="9e0-dY-7ps" firstAttribute="top" secondItem="SSQ-Ge-5iN" secondAttribute="bottom" constant="8" symbolic="YES" id="Dw4-TO-mpn"/>
+                            <constraint firstItem="SSQ-Ge-5iN" firstAttribute="bottom" secondItem="mE8-5R-XAL" secondAttribute="bottom" id="MXq-al-xBa"/>
+                            <constraint firstItem="zpE-XW-Hcl" firstAttribute="leading" secondItem="SSQ-Ge-5iN" secondAttribute="trailing" constant="8" symbolic="YES" id="Ooq-QF-wej"/>
+                            <constraint firstAttribute="bottom" secondItem="9e0-dY-7ps" secondAttribute="bottom" id="Pm9-WW-w3a"/>
+                            <constraint firstItem="zpE-XW-Hcl" firstAttribute="top" secondItem="SSQ-Ge-5iN" secondAttribute="top" id="j6L-pR-OYZ"/>
+                            <constraint firstItem="SSQ-Ge-5iN" firstAttribute="leading" secondItem="mE8-5R-XAL" secondAttribute="trailing" constant="8" symbolic="YES" id="pfG-Ev-fsZ"/>
+                            <constraint firstItem="9e0-dY-7ps" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="yUK-uF-ysL"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="chart" destination="9e0-dY-7ps" id="YAb-sc-h8R"/>
+                        <outlet property="record" destination="mE8-5R-XAL" id="of9-aQ-3Un"/>
                         <outlet property="spinner" destination="i0I-J4-QSH" id="TDi-ak-e8b"/>
+                        <outlet property="tags" destination="zpE-XW-Hcl" id="aQ1-4G-JJr"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="323" y="298"/>
+            <point key="canvasLocation" x="323" y="335"/>
         </scene>
     </scenes>
 </document>

@@ -13,8 +13,11 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
 
     @IBOutlet var spinner: UIActivityIndicatorView!
     @IBOutlet var chart: ChartView!
+    @IBOutlet var tags: UITextField!
+    @IBOutlet var record: UIButton!
     
-    var app: AppDelegate!
+    private var app: AppDelegate!
+    private var writer: FileWriter? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,13 +33,25 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
         }
     }
     
+    @IBAction func didClickRecord(sender: UIButton) {
+        if (writer != nil) {
+            writer!.close()
+            writer = nil
+            self.record.setTitle("Record", forState: UIControlState.Normal)
+        } else {
+            writer = FileWriter.init(tags: self.tags.text!)
+            self.record.setTitle("Stop", forState: UIControlState.Normal)
+        }
+    }
+    
     func didUpdateState(state: CBCentralManagerState) {
         if (state == CBCentralManagerState.PoweredOn) {
             app.bleClient.startScan()
             spinner.startAnimating()
         } else if (state == CBCentralManagerState.PoweredOff) {
-            // TODO(abhi): Ask user to turn on bluetooth
-            print("Bluetooth is OFF")
+            let alert = UIAlertController(title: "Bluetooth OFF", message: "Please turn on Bluetooth to connect to monitor.", preferredStyle: UIAlertControllerStyle.Alert)
+            alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
+            self.presentViewController(alert, animated: true, completion: nil)
         } else {
             print("Invalid bluetooth state \(state)")
         }
@@ -51,11 +66,18 @@ class ViewController: UIViewController, BluetoothUpdatesDelegate {
         
     }
     
-    func didUpdateData(data: [UInt8]) {
+    func didUpdateData(data: NSData) {
+        if (writer != nil) {
+            writer!.update(data)
+        }
         chart.update(data)
     }
     
     func didDisconnectPeripheral(peripheral: CBPeripheral) {
+        if (writer != nil) {
+            writer!.close()
+            self.record.titleLabel?.text = "Record"
+        }
         app.bleClient.startScan()
         spinner.hidden = false
     }

@@ -13,7 +13,7 @@ protocol BluetoothUpdatesDelegate: class {
     func didUpdateState(state: CBCentralManagerState)
     func didFindPeripheral(peripheral: CBPeripheral)
     func didConnectPeripheral(peripheral: CBPeripheral)
-    func didUpdateData(data: [UInt8])
+    func didUpdateData(data: NSData)
     func didDisconnectPeripheral(peripheral: CBPeripheral)
 }
 
@@ -50,9 +50,12 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
     }
     
     func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
-        if (peripheral.name != nil && peripheral.name!.hasPrefix(Config.BT_DEVICE_NAME_PREFIX)) {
-            centralManager!.stopScan()
-            delegate?.didFindPeripheral(peripheral)
+        for prefix in Config.BT_DEVICE_NAME_PREFIX {
+            if (peripheral.name != nil && peripheral.name!.hasPrefix(prefix)) {
+                centralManager!.stopScan()
+                delegate?.didFindPeripheral(peripheral)
+                break
+            }
         }
     }
     
@@ -78,9 +81,7 @@ class BluetoothSmartClient : NSObject, CBCentralManagerDelegate, CBPeripheralDel
     }
     
     func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
-        let data: NSData = characteristic.value!
-        let value: [UInt8] = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length))
-        delegate?.didUpdateData(value)
+        delegate?.didUpdateData(characteristic.value!)
     }
     
     func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {

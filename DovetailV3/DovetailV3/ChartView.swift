@@ -14,7 +14,8 @@ class ChartView : UIView {
     private var data: [UInt8] = []
     private var updateCount: Int = 0
     
-    func update(chunk: [UInt8]) {
+    func update(nsData: NSData) {
+        let chunk: [UInt8] = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(nsData.bytes), count: nsData.length))
         if (Config.GRAPH_LENGTH < (data.count + chunk.count)) {
             for _ in 0..<chunk.count {
                 data.removeFirst()

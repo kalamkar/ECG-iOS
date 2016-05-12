@@ -23,6 +23,33 @@ class Utils {
     static func setRecordingTags(tags: String?) {
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(tags, forKey: "RECORDING_TAGS")
+        defaults.synchronize()
+    }
+    
+    static func addToUploadQueue(filename: String) {
+        var queue: [String] = getUploadQueue()
+        queue.append(filename)
+        setUploadQueue(queue)
+        uploadRecordings()
+    }
+
+    static func setUploadQueue(queue: [String]) {
+        let defaults = NSUserDefaults.standardUserDefaults()
+        defaults.setObject(queue, forKey: "UPLOAD_QUEUE")
+        defaults.synchronize()
+    }
+
+    static func getUploadQueue() -> [String] {
+        let defaults = NSUserDefaults.standardUserDefaults()
+        let object = defaults.objectForKey("UPLOAD_QUEUE")
+        return object != nil ? object as! [String] : []
+    }
+    
+    static func uploadRecordings() {
+        var queue: [String] = getUploadQueue()
+        if (queue.count > 0) {
+            RecordingUploadTask(filename: queue[0]).run();
+        }
     }
 
     static func getUIState() -> UIApplicationState {

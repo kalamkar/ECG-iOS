@@ -9,11 +9,10 @@
 import Foundation
 
 class Config {
-    static let API_URL:String = "http://dovetail-data-1.appspot.com"
+    static let API_URL:String = "https://dovetail-data-1.appspot.com"
     static let RECORDING_URL:String = API_URL + "/recording"
     
-//    static let BT_DEVICE_NAME_PREFIX:String = "Dovetail"
-    static let BT_DEVICE_NAME_PREFIX:String = "nRF5x"
+    static let BT_DEVICE_NAME_PREFIX:[String] = ["Dovetail", "nRF5x"]
     
     static let DOVETAIL_SERVICE:String = "404846A0-608A-11E5-AB45-0002A5D5C51B"
     static let ECG_CHARACTERISTIC:String = "404846A1-608A-11E5-AB45-0002A5D5C51B"
